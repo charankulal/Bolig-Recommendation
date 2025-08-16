@@ -47,3 +47,13 @@ class UserDetail(models.Model):
 
         if errors:
             raise ValidationError(errors)
+
+class Tenancy(models.Model):
+    name = models.CharField(max_length=100)
+    rent_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    size = models.DecimalField(max_digits=7, decimal_places=2, help_text="Size in square meters")
+    room = models.PositiveIntegerField(help_text="Number of rooms")
+    address = models.CharField(max_length=200)
+
+    def __str__(self):
+        return f"{self.name} - {self.address}"
