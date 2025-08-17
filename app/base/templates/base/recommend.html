@@ -10,14 +10,16 @@
     .form-group {
         margin-bottom: 1rem;
     }
+
+    .tenancy-card {
+        margin-bottom: 1.5rem;
+    }
 </style>
 
 <div class="container">
     <div class="row d-flex">
-        <div class="col-4 border-end  border-primary-subtle border-3">
-            <h2>
-                My Profile
-            </h2>
+        <div class="col-4 border-end border-primary-subtle border-3">
+            <h2 class="mb-4">My Profile</h2>
             {% if success %}
             <div class="alert alert-success">Form submitted successfully!</div>
             {% endif %}
@@ -63,7 +65,7 @@
                 </div>
                 <div class="form-group form-check">
                     {{ form.is_student }}
-                    <label class="form-check-label" for="{{ form.is_student.id_for_label }}">{{ form.is_student.label}}</label>
+                    <label class="form-check-label" for="{{ form.is_student.id_for_label }}">{{ form.is_student.label }}</label>
                     {% if form.is_student.errors %}
                     <div class="text-danger">{{ form.is_student.errors }}</div>
                     {% endif %}
@@ -78,19 +80,15 @@
                     <div class="text-danger">{{ form.university_address.errors }}</div>
                     {% endif %}
                 </div>
-                <button type="submit" class="btn btn-primary">Submit</button>
+                <button type="submit" class="btn btn-primary">Get Recommended Tenancies</button>
             </form>
         </div>
 
-
         <div class="col-8">
-            <h2>
-                Recommendated Tenancies
-            </h2>
-            <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Illum, nulla! Nisi cumque quos quod repellat
-                voluptas molestias laudantium rem similique, vero excepturi molestiae dolor minima possimus fugiat.
-                Iste,
-                perferendis in.</p>
+            <h2>Recommended Tenancies</h2>
+            <div id="tenancies-container" class="row">
+
+            </div>
         </div>
     </div>
 </div>
@@ -103,6 +101,7 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $(document).ready(function () {
+
         // Toggle university address field based on is_student checkbox
         $('#is-student').change(function () {
             if ($(this).is(':checked')) {
@@ -148,17 +147,17 @@
                             $(`#${suggestionsId}`).hide();
                         }
                     });
-                }, 300); // Debounce input
+                }, 300);
             });
 
-            // Handle suggestion click
+     
             $(`#${suggestionsId}`).on('click', 'a', function (e) {
                 e.preventDefault();
                 $(`#${inputId}`).val($(this).data('address'));
                 $(`#${suggestionsId}`).hide();
             });
 
-            // Hide dropdown when clicking outside
+
             $(document).on('click', function (e) {
                 if (!$(e.target).closest(`#${inputId}, #${suggestionsId}`).length) {
                     $(`#${suggestionsId}`).hide();
@@ -166,10 +165,69 @@
             });
         }
 
-        // Setup autocomplete for both address fields
         setupAutocomplete('address-input', 'address-suggestions');
         setupAutocomplete('university-address-input', 'university-address-suggestions');
+
+        // Handle form submission
+        $('#profile-form').on('submit', function (e) {
+            e.preventDefault(); 
+
+            $.ajax({
+                url: '/recommendations/',
+                type: 'POST',
+                data: $(this).serialize(),
+                success: function (data) {
+                    const tenancies = data.tenancies; 
+                    const $container = $('#tenancies-container');
+                    $container.empty(); 
+
+                    if (tenancies && tenancies.length > 0) {
+                        tenancies.slice(0, 10).forEach(tenancy => {
+                            
+                            const cardHtml = `
+                                <div class="col-md-12 tenancy-card">
+                                    <div class="card h-100 w-100">
+                                        <span class="position-absolute end-0 badge badge text-bg-success">
+                                            ${tenancy.recommendation}
+                                        </span>
+                                        <div class="card-body">
+                                            <h5 class="card-title mb-0">${tenancy.title}</h5>
+                                            <p class="card-text mb-0">${tenancy.description}</p>
+                                            <div class="d-flex flex-row flex-wrap gap-3 mb-2">
+                                                <p class="card-text mb-0"><strong>Price:</strong> ${tenancy.price}</p>
+                                                <p class="card-text mb-0"><strong>Address:</strong> ${tenancy.address}</p>
+                                                <p class="card-text mb-0"><strong>Rooms:</strong> ${tenancy.rooms}</p>
+                                                <p class="card-text mb-0"><strong>Size:</strong> ${tenancy.size}</p>
+                                            </div>
+                                            <a href="#" class="btn btn-primary mx-2 d-inline-flex align-items-center">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-right mx-2" viewBox="0 0 16 16">
+                                                    <path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0z"/>
+                                                    <path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708z"/>
+                                                    </svg>
+                                                View Details
+                                            </a>
+                                            <a href="#" class="btn btn-success mx-2 d-inline-flex align-items-center">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bag-heart-fill mx-2" viewBox="0 0 16 16">
+                                                    <path d="M11.5 4v-.5a3.5 3.5 0 1 0-7 0V4H1v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4zM8 1a2.5 2.5 0 0 1 2.5 2.5V4h-5v-.5A2.5 2.5 0 0 1 8 1m0 6.993c1.664-1.711 5.825 1.283 0 5.132-5.825-3.85-1.664-6.843 0-5.132"/>
+                                                </svg>
+                                                Add to wishlist
+                                            </a>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            `;
+                            $container.append(cardHtml);
+                        });
+                    } else {
+                        $container.append('<p>No tenancies found.</p>');
+                    }
+                },
+                error: function () {
+                    $('#tenancies-container').html('<p class="text-danger">Error loading recommendations.</p>');
+                }
+            });
+        });
     });
 </script>
-
 {% endblock %}
