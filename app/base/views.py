@@ -6,6 +6,8 @@ from .utilities.predict_tenancy_utility import predict_tenancy_scores
 from django.views.decorators.csrf import csrf_exempt
 from .models import Tenancy
 import json
+from .assets.data import addresses, universities
+from .assets.profile_data import myprofiledata
 
 def home(request):
     return render(request, "base/home.html")
@@ -19,14 +21,11 @@ def recommend_page(request):
         form = MyProfileForm()
     
     return render(request, 'base/recommend.html', {
-        'form': form
+        'form': form,
+        'addresses': addresses,
+        'universities': universities,
+        'myprofiledata': myprofiledata,
     })
-
-def address_autocomplete(request):
-    query = request.GET.get('query', '')
-    country_code = request.GET.get('country_code', 'dk')
-    suggestions = get_address_suggestions(query, country_code=country_code)
-    return JsonResponse({'suggestions': suggestions})
 
 @csrf_exempt
 def recommendations(request):
