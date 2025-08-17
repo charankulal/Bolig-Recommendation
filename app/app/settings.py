@@ -62,8 +62,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'app.wsgi.application'
 
 
-GEOAPIFY_API_KEY = os.getenv('geoapify_api_key')
-
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
