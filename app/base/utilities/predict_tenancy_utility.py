@@ -70,12 +70,12 @@ def predict_tenancy_scores(profile_data, all_tenancies):
             "rooms": f"{tenancy.get('total_rooms', 0)} rooms",
             "size": f"{tenancy.get('size', 0)} sq meters",
             "recommendation": min(100, max(0, round(score * 100))),
-            "distace_to_new_tenancy": round(tenancy.get("distance_to_new_tenancy", 0), 2),
+            "distace_to_new_tenancy": feature_row["Distance_to_New_Tenancy"],
             "Hospital_distance": round(float(tenancy.get("hospital_distance", 0)), 2) or 0,
             "Gym_distance": round(float(tenancy.get("gym_distance", 0)), 2) or 0,
             "School_distance": round(float(tenancy.get("school_distance", 0)), 2) or 0,
             "Supermarket_distance": round(float(tenancy.get("supermarket_distance", 0)), 2) or 0,
-            "Distance_to_University": round(float(tenancy.get("distance_to_university", 0)), 2) if tenancy.get("distance_to_university") is not None else 'N/A',
+            "Distance_to_University": feature_row["Distance_to_University"] if is_student else 'N/A',
         }
         recommendations.append(recommendation)
 
