@@ -61,8 +61,5 @@ Access the app at [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
 - If you encounter missing packages, ensure all requirements are installed.
 - For database issues, delete `db.sqlite3` and rerun migrations.
 
-## License
-MIT
-
 ## Contact
 For questions, contact the maintainers
