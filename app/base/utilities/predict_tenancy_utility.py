@@ -49,12 +49,12 @@ def predict_tenancy_scores(profile_data):
 
         # Append recommendation entry
         recommendations.append({
-            "title": tenancy.title,  # assuming you have a `title` field in Tenancy
-            "description": tenancy.description,  # assuming `description`
-            "price": f"DKK {tenancy.rent}/month",
-            "address": tenancy.address,  # assuming `address`
+            "title": tenancy.name,
+            "description": "",
+            "price": f"DKK {tenancy.rent_amount}/month",
+            "address": tenancy.address, 
             "rooms": f"{tenancy.total_rooms} rooms",
-            "size": f"{tenancy.area_m2} sq meters",
+            "size": f"{tenancy.size} sq meters",
             "recommendation": {min(100, max(0, round(score * 100)))},
         })
 
