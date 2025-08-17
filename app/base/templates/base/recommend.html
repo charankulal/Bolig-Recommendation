@@ -29,7 +29,7 @@
                 {% csrf_token %}
                 <div class="form-group">
                     <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
-                    {{ form.name }}
+                    <input type="text" class="form-control" id="{{ form.name.id_for_label }}" name="name" value="{{ myprofiledata.0.name|default:'' }}">
                     {% if form.name.errors %}
                     <div class="text-danger">{{ form.name.errors }}</div>
                     {% endif %}
@@ -37,58 +37,58 @@
                 <div class="form-group">
                     <label for="{{ form.address.id_for_label }}">{{ form.address.label }}</label>
                     <select class="form-control" id="id_address" name="address">
-                        <option value="" selected disabled>Select an address</option>
+                        <option value="" {% if not myprofiledata.0.current_address.address %}selected{% endif %} disabled>Select an address</option>
                         {% for addr in addresses %}
-                        <option value="{{ addr.address }}" data-lat="{{ addr.coordinates.latitude }}" data-lon="{{ addr.coordinates.longitude }}">{{ addr.address }}</option>
+                        <option value="{{ addr.address }}" data-lat="{{ addr.coordinates.latitude }}" data-lon="{{ addr.coordinates.longitude }}" {% if addr.address == myprofiledata.0.current_address.address %}selected{% endif %}>{{ addr.address }}</option>
                         {% endfor %}
                     </select>
                     {% if form.address.errors %}
                     <div class="text-danger">{{ form.address.errors }}</div>
                     {% endif %}
-                    <input type="hidden" name="address_latitude" id="address-latitude">
-                    <input type="hidden" name="address_longitude" id="address-longitude">
+                    <input type="hidden" name="address_latitude" id="address-latitude" value="{{ myprofiledata.0.current_address.coordinates.latitude|default:'' }}">
+                    <input type="hidden" name="address_longitude" id="address-longitude" value="{{ myprofiledata.0.current_address.coordinates.longitude|default:'' }}">
                 </div>
                 <div class="form-group">
                     <label for="{{ form.age.id_for_label }}">{{ form.age.label }}</label>
-                    {{ form.age }}
+                    <input type="number" class="form-control" id="{{ form.age.id_for_label }}" name="age" value="{{ myprofiledata.0.age|default:'' }}">
                     {% if form.age.errors %}
                     <div class="text-danger">{{ form.age.errors }}</div>
                     {% endif %}
                 </div>
                 <div class="form-group">
                     <label for="{{ form.number_of_adults.id_for_label }}">{{ form.number_of_adults.label }}</label>
-                    {{ form.number_of_adults }}
+                    <input type="number" class="form-control" id="{{ form.number_of_adults.id_for_label }}" name="number_of_adults" value="{{ myprofiledata.0.number_of_adults|default:'' }}">
                     {% if form.number_of_adults.errors %}
                     <div class="text-danger">{{ form.number_of_adults.errors }}</div>
                     {% endif %}
                 </div>
                 <div class="form-group">
                     <label for="{{ form.number_of_children.id_for_label }}">{{ form.number_of_children.label }}</label>
-                    {{ form.number_of_children }}
+                    <input type="number" class="form-control" id="{{ form.number_of_children.id_for_label }}" name="number_of_children" value="{{ myprofiledata.0.number_of_children|default:'' }}">
                     {% if form.number_of_children.errors %}
                     <div class="text-danger">{{ form.number_of_children.errors }}</div>
                     {% endif %}
                 </div>
                 <div class="form-group form-check">
-                    {{ form.is_student }}
+                    <input type="checkbox" class="form-check-input" id="{{ form.is_student.id_for_label }}" name="is_student" {% if myprofiledata.0.is_student %}checked{% endif %}>
                     <label class="form-check-label" for="{{ form.is_student.id_for_label }}">{{ form.is_student.label }}</label>
                     {% if form.is_student.errors %}
                     <div class="text-danger">{{ form.is_student.errors }}</div>
                     {% endif %}
                 </div>
-                <div class="form-group" id="university-address-group" style="display: none;">
+                <div class="form-group" id="university-address-group" style="display: '{% if myprofiledata.0.is_student %}block{% else %}none{% endif %}';">
                     <label for="{{ form.university_address.id_for_label }}">{{ form.university_address.label }}</label>
-                    <select class="form-control" id="id_university_address" name="university_address" disabled>
-                        <option value="" selected disabled>Select a university</option>
+                    <select class="form-control" id="id_university_address" name="university_address" {% if not myprofiledata.0.is_student %}disabled{% endif %}>
+                        <option value="" {% if not myprofiledata.0.university.name %}selected{% endif %} disabled>Select a university</option>
                         {% for uni in universities %}
-                        <option value="{{ uni.name }}" data-lat="{{ uni.coordinates.latitude }}" data-lon="{{ uni.coordinates.longitude }}">{{ uni.name }}</option>
+                        <option value="{{ uni.name }}" data-lat="{{ uni.coordinates.latitude }}" data-lon="{{ uni.coordinates.longitude }}" {% if uni.name == myprofiledata.0.university.name %}selected{% endif %}>{{ uni.name }}</option>
                         {% endfor %}
                     </select>
                     {% if form.university_address.errors %}
                     <div class="text-danger">{{ form.university_address.errors }}</div>
                     {% endif %}
-                    <input type="hidden" name="university_latitude" id="university-latitude">
-                    <input type="hidden" name="university_longitude" id="university-longitude">
+                    <input type="hidden" name="university_latitude" id="university-latitude" value="{{ myprofiledata.0.university.coordinates.latitude|default:'' }}">
+                    <input type="hidden" name="university_longitude" id="university-longitude" value="{{ myprofiledata.0.university.coordinates.longitude|default:'' }}">
                 </div>
                 <button type="submit" class="btn btn-primary">Get Recommended Tenancies</button>
             </form>
@@ -97,7 +97,7 @@
         <div class="col-8">
             <h2>Recommended Tenancies</h2>
             <div id="tenancies-container" class="row">
-                <!-- Cards will be dynamically inserted here -->
+                
             </div>
         </div>
     </div>
@@ -111,7 +111,7 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $(document).ready(function () {
-        // Toggle university address field based on is_student checkbox
+
         $('#is-student').change(function () {
             if ($(this).is(':checked')) {
                 $('#university-address-group').show();
@@ -125,6 +125,7 @@
             }
         });
 
+
         $('#id_address').change(function () {
             const selectedOption = $(this).find('option:selected');
             const lat = selectedOption.data('lat');
@@ -133,7 +134,7 @@
             $('#address-longitude').val(lon || '');
         });
 
-        // Update hidden coordinate fields when university is selected
+
         $('#id_university_address').change(function () {
             const selectedOption = $(this).find('option:selected');
             const lat = selectedOption.data('lat');
@@ -142,7 +143,7 @@
             $('#university-longitude').val(lon || '');
         });
 
-        // Handle form submission
+
         $('#profile-form').on('submit', function (e) {
             e.preventDefault();
 
