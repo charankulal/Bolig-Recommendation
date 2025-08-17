@@ -112,7 +112,7 @@
 <script>
     $(document).ready(function () {
         // Toggle university address field based on is_student checkbox
-        $('#id_is_student').change(function () {
+        $('#is-student').change(function () {
             if ($(this).is(':checked')) {
                 $('#university-address-group').show();
                 $('#id_university_address').prop('disabled', false);
@@ -125,7 +125,6 @@
             }
         });
 
-        // Update hidden coordinate fields when address is selected
         $('#id_address').change(function () {
             const selectedOption = $(this).find('option:selected');
             const lat = selectedOption.data('lat');
