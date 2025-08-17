@@ -55,10 +55,14 @@ def predict_tenancy_scores(profile_data):
             "address": tenancy.address,  # assuming `address`
             "rooms": f"{tenancy.total_rooms} rooms",
             "size": f"{tenancy.area_m2} sq meters",
-            "recommendation": f"{min(100, max(0, round(score * 100)))}% relevant to your profile",
+            "recommendation": {min(100, max(0, round(score * 100)))},
         })
 
     # Sort recommendations by score (descending)
-    recommendations = sorted(recommendations, key=lambda x: int(x["recommendation"].replace("% relevant to your profile", "")), reverse=True)
+    recommendations = sorted(
+        recommendations,
+        key=lambda x: x["recommendation"],
+        reverse=True
+    )
     
     return recommendations
