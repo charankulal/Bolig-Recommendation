@@ -1,4 +1,6 @@
 {% extends 'boilerplate.html' %}
+{% load static %}
+
 {% block content %}
 <style>
     .dropdown-menu {
@@ -34,13 +36,17 @@
                 </div>
                 <div class="form-group">
                     <label for="{{ form.address.id_for_label }}">{{ form.address.label }}</label>
-                    {{ form.address }}
-                    <div class="dropdown">
-                        <ul class="dropdown-menu" id="address-suggestions"></ul>
-                    </div>
+                    <select class="form-control" id="id_address" name="address">
+                        <option value="" selected disabled>Select an address</option>
+                        {% for addr in addresses %}
+                        <option value="{{ addr.address }}" data-lat="{{ addr.coordinates.latitude }}" data-lon="{{ addr.coordinates.longitude }}">{{ addr.address }}</option>
+                        {% endfor %}
+                    </select>
                     {% if form.address.errors %}
                     <div class="text-danger">{{ form.address.errors }}</div>
                     {% endif %}
+                    <input type="hidden" name="address_latitude" id="address-latitude">
+                    <input type="hidden" name="address_longitude" id="address-longitude">
                 </div>
                 <div class="form-group">
                     <label for="{{ form.age.id_for_label }}">{{ form.age.label }}</label>
@@ -72,13 +78,17 @@
                 </div>
                 <div class="form-group" id="university-address-group" style="display: none;">
                     <label for="{{ form.university_address.id_for_label }}">{{ form.university_address.label }}</label>
-                    {{ form.university_address }}
-                    <div class="dropdown">
-                        <ul class="dropdown-menu" id="university-address-suggestions"></ul>
-                    </div>
+                    <select class="form-control" id="id_university_address" name="university_address" disabled>
+                        <option value="" selected disabled>Select a university</option>
+                        {% for uni in universities %}
+                        <option value="{{ uni.name }}" data-lat="{{ uni.coordinates.latitude }}" data-lon="{{ uni.coordinates.longitude }}">{{ uni.name }}</option>
+                        {% endfor %}
+                    </select>
                     {% if form.university_address.errors %}
                     <div class="text-danger">{{ form.university_address.errors }}</div>
                     {% endif %}
+                    <input type="hidden" name="university_latitude" id="university-latitude">
+                    <input type="hidden" name="university_longitude" id="university-longitude">
                 </div>
                 <button type="submit" class="btn btn-primary">Get Recommended Tenancies</button>
             </form>
@@ -87,7 +97,7 @@
         <div class="col-8">
             <h2>Recommended Tenancies</h2>
             <div id="tenancies-container" class="row">
-
+                <!-- Cards will be dynamically inserted here -->
             </div>
         </div>
     </div>
@@ -101,93 +111,56 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $(document).ready(function () {
-
         // Toggle university address field based on is_student checkbox
         $('#is-student').change(function () {
             if ($(this).is(':checked')) {
                 $('#university-address-group').show();
-                $('#university-address-input').prop('disabled', false);
+                $('#id_university_address').prop('disabled', false);
             } else {
                 $('#university-address-group').hide();
-                $('#university-address-input').prop('disabled', true);
+                $('#id_university_address').prop('disabled', true);
+                $('#id_university_address').val('');
+                $('#university-latitude').val('');
+                $('#university-longitude').val('');
             }
         });
 
-        // Autocomplete function for address fields
-        function setupAutocomplete(inputId, suggestionsId) {
-            let timeout;
-            $(`#${inputId}`).on('input', function () {
-                clearTimeout(timeout);
-                const query = $(this).val();
-                if (query.length < 3) {
-                    $(`#${suggestionsId}`).hide();
-                    return;
-                }
+        $('#id_address').change(function () {
+            const selectedOption = $(this).find('option:selected');
+            const lat = selectedOption.data('lat');
+            const lon = selectedOption.data('lon');
+            $('#address-latitude').val(lat || '');
+            $('#address-longitude').val(lon || '');
+        });
 
-                timeout = setTimeout(() => {
-                    $.ajax({
-                        url: 'autocomplete/',
-                        data: { query: query, country_code: 'dk' },
-                        success: function (data) {
-                            const suggestions = data.suggestions;
-                            const $dropdown = $(`#${suggestionsId}`);
-                            $dropdown.empty();
-                            if (suggestions.length > 0) {
-                                suggestions.forEach(suggestion => {
-                                    $dropdown.append(
-                                        `<li><a class="dropdown-item" href="#" data-address="${suggestion.address}" data-lat="${suggestion.latitude}" data-lon="${suggestion.longitude}">${suggestion.address}</a></li>`
-                                    );
-                                });
-                                $dropdown.show();
-                            } else {
-                                $dropdown.hide();
-                            }
-                        },
-                        error: function () {
-                            $(`#${suggestionsId}`).hide();
-                        }
-                    });
-                }, 300);
-            });
-
-     
-            $(`#${suggestionsId}`).on('click', 'a', function (e) {
-                e.preventDefault();
-                $(`#${inputId}`).val($(this).data('address'));
-                $(`#${suggestionsId}`).hide();
-            });
-
-
-            $(document).on('click', function (e) {
-                if (!$(e.target).closest(`#${inputId}, #${suggestionsId}`).length) {
-                    $(`#${suggestionsId}`).hide();
-                }
-            });
-        }
-
-        setupAutocomplete('address-input', 'address-suggestions');
-        setupAutocomplete('university-address-input', 'university-address-suggestions');
+        // Update hidden coordinate fields when university is selected
+        $('#id_university_address').change(function () {
+            const selectedOption = $(this).find('option:selected');
+            const lat = selectedOption.data('lat');
+            const lon = selectedOption.data('lon');
+            $('#university-latitude').val(lat || '');
+            $('#university-longitude').val(lon || '');
+        });
 
         // Handle form submission
         $('#profile-form').on('submit', function (e) {
-            e.preventDefault(); 
+            e.preventDefault();
 
             $.ajax({
                 url: '/recommendations/',
                 type: 'POST',
                 data: $(this).serialize(),
                 success: function (data) {
-                    const tenancies = data.tenancies; 
+                    const tenancies = data.tenancies;
                     const $container = $('#tenancies-container');
-                    $container.empty(); 
+                    $container.empty();
 
                     if (tenancies && tenancies.length > 0) {
                         tenancies.slice(0, 10).forEach(tenancy => {
-                            
                             const cardHtml = `
                                 <div class="col-md-12 tenancy-card">
                                     <div class="card h-100 w-100">
-                                        <span class="position-absolute end-0 badge badge text-bg-success">
+                                        <span class="position-absolute end-0 badge text-bg-success">
                                             ${tenancy.recommendation}% relevant to your profile
                                         </span>
                                         <div class="card-body">
@@ -203,7 +176,7 @@
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-right mx-2" viewBox="0 0 16 16">
                                                     <path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0z"/>
                                                     <path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708z"/>
-                                                    </svg>
+                                                </svg>
                                                 View Details
                                             </a>
                                             <a href="#" class="btn btn-success mx-2 d-inline-flex align-items-center">
@@ -213,7 +186,6 @@
                                                 Add to wishlist
                                             </a>
                                         </div>
-
                                     </div>
                                 </div>
                             `;
