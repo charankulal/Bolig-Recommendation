@@ -33,10 +33,6 @@ Install main requirements:
 ```powershell
 pip install -r requirements.txt
 ```
-Install app-specific requirements (if any):
-```powershell
-pip install -r app\requirements.txt
-```
 
 ### 4. Database Migration
 Navigate to the `app` directory and run migrations:
