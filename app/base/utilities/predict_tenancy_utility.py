@@ -1,3 +1,4 @@
+from app.base.utilities.distance_calc_utility import haversine
 import joblib
 from pathlib import Path
 import pandas as pd
