@@ -1,3 +1,4 @@
+from app.base.utilities.distance_calc_utility import haversine
 from ..models import Tenancy
 import joblib
 from pathlib import Path
@@ -30,7 +31,9 @@ def predict_tenancy_scores(profile_data):
             "Adults": profile_data.get("number_of_adults"),
             "Children": profile_data.get("number_of_children"),
             "IsStudent": profile_data.get("is_student"),
-            "Distance_to_New_Tenancy": 0.00, # to be calculated on the go
+            "Distance_to_New_Tenancy": haversine(profile_data.current_address.coordinates.latitude, 
+                                                 profile_data.current_address.coordinates.longitude, 
+                                                 tenancy.latitude, tenancy.longitude),
             "Rent": tenancy.rent_amount,  # from tenancy table
             "Total_Rooms": tenancy.total_rooms,
             "Area_m2": tenancy.size,
@@ -38,7 +41,9 @@ def predict_tenancy_scores(profile_data):
             "Gym_distance": tenancy.gym_distance,
             "School_distance": tenancy.school_distance,
             "Supermarket_distance": tenancy.supermarket_distance,
-            "Distance_to_University": tenancy.distance_to_university,
+            "Distance_to_University": haversine(profile_data.university.coordinates.latitude, 
+                                                 profile_data.university.coordinates.longitude, 
+                                                 tenancy.latitude, tenancy.longitude),
         }
 
         # Convert to DataFrame since model expects tabular format
