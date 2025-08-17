@@ -50,10 +50,28 @@ class UserDetail(models.Model):
 
 class Tenancy(models.Model):
     name = models.CharField(max_length=100)
+    description = models.CharField(max_length=300, null=True, blank=True)
     rent_amount = models.DecimalField(max_digits=10, decimal_places=2)
     size = models.DecimalField(max_digits=7, decimal_places=2, help_text="Size in square meters")
-    room = models.PositiveIntegerField(help_text="Number of rooms")
+    total_rooms = models.PositiveIntegerField(help_text="Number of rooms")
     address = models.CharField(max_length=200)
+    # Distances (in km or meters, depending on your choice)
+    hospital_distance = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True, help_text="Distance to nearest hospital (km)")
+    gym_distance = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True, help_text="Distance to nearest gym (km)")
+    school_distance = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True, help_text="Distance to nearest school (km)")
+    supermarket_distance = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True, help_text="Distance to nearest supermarket (km)")
 
+    # Geolocation
+    latitude = models.DecimalField(
+        max_digits=9, decimal_places=6, 
+        null=True, blank=True, 
+        help_text="Latitude of the property"
+    )
+    longitude = models.DecimalField(
+        max_digits=9, decimal_places=6, 
+        null=True, blank=True, 
+        help_text="Longitude of the property"
+    )
+    
     def __str__(self):
         return f"{self.name} - {self.address}"

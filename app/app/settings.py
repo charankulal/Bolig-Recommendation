@@ -62,8 +62,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'app.wsgi.application'
 
 
-GEOAPIFY_API_KEY = os.getenv('geoapify_api_key')
-
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
@@ -116,3 +114,10 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Static files (CSS, JavaScript, Images)
+STATIC_URL = '/static/'  # URL prefix for static files in templates
+STATICFILES_DIRS = [
+    BASE_DIR / "assets",  # Path to the Assets folder in the project root
+]
+STATIC_ROOT = BASE_DIR / "staticfiles"

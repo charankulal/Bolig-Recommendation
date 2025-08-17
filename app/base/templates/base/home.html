@@ -2,20 +2,28 @@
 {% block content %}
 <div class="jumbotron text-center">
     <h1 class="display-4">Welcome to Bolig recommendation!</h1>
-    <p class="lead">In the Danish housing market, finding the perfect home is challenging due to diverse needs and competitive demand. Bolig recommendation offers a tailored solution, leveraging data-driven insights to recommend ideal housing options. By analyzing factors like location, amenities, and household preferences, our system ensures personalized matches for renters and buyers. Built and trained on Danish housing data, our model accounts for variables such as age, family size, and proximity to essential services, delivering precise recommendations. Bolig recommendation empowers users to navigate Denmark's housing landscape efficiently, ensuring optimal choices for every lifestyle.</p>
-    
+    <p class="lead">In the Danish housing market, finding the perfect home is challenging due to diverse needs and
+        competitive demand. Bolig recommendation offers a tailored solution, leveraging data-driven insights to
+        recommend ideal housing options. By analyzing factors like location, amenities, and household preferences, our
+        system ensures personalized matches for renters and buyers. Built and trained on Danish housing data, our model
+        accounts for variables such as age, family size, and proximity to essential services, delivering precise
+        recommendations. Bolig recommendation empowers users to navigate Denmark's housing landscape efficiently,
+        ensuring optimal choices for every lifestyle.</p>
+
     <hr class="my-4">
     <div class="container">
         <div class="row offset-4 mt-5">
             <div class="col-6 mb-3">
                 <div class="card bg-light border border-dark rounded">
-                    <div class="card-body">
-                        <h5 class="card-title fs-3 fw-bold">Proceed to recommendation system</h5>
-                        <p class="card-text fs-5">Click here to proceed to recommendation system</p>
-                    </div>
+                    <a class="text-decoration-none text-black" href="{% url 'recommend' %}">
+                        <div class="card-body">
+                            <h5 class="card-title fs-3 fw-bold">Proceed to recommendation system</h5>
+                            <p class="card-text fs-5 text-primary">Click here to proceed to recommendation system</p>
+                        </div>
+                    </a>
                 </div>
             </div>
-            
+
         </div>
     </div>
 </div>
