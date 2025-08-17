@@ -1,10 +1,8 @@
-from app.base.utilities.distance_calc_utility import haversine
+from base.utilities.distance_calc_utility import haversine
 import joblib
 from pathlib import Path
 import pandas as pd
 import numpy as np
-
-from base.utilities.maps_utility import haversine
 
 def load_model():
     model_path = Path(__file__).parent.parent.parent.parent / 'stacked_housing_model.joblib'
@@ -14,26 +12,18 @@ def predict_tenancy_scores(profile_data, all_tenancies):
     all_tenancies = list(all_tenancies.values())
     
     if profile_data is None or not all_tenancies:
-        print("No profile data or tenancies available for prediction.")
         return []
     
     is_student = profile_data.get("is_student") == "on"
     
     if is_student:
-        university_lat = profile_data.get("university_latitude")
-        university_lon = profile_data.get("university_longitude")
-        for tenancy in all_tenancies:         
-            distance_to_university = haversine(float(university_lat), float(university_lon), float(tenancy.get("latitude")), float(tenancy.get("longitude")))
-            tenancy["distance_to_university"] = distance_to_university
-    else:
-        for tenancy in all_tenancies:
-            tenancy["distance_to_university"] = None
+        university_lat = float(profile_data.get("university_latitude"))
+        university_lon = float(profile_data.get("university_longitude"))
+    
             
     current_lat = float(profile_data.get("address_latitude"))
     current_lon = float(profile_data.get("address_longitude"))
-    for tenancy in all_tenancies:
-        tenancy["distance_to_new_tenancy"] = haversine(current_lat, current_lon, float(tenancy.get("latitude")), float(tenancy.get("longitude")))
-        
+    
     features = [
         'Age', 'Adults', 'Children', 'Rent', 'IsStudent',
         'Distance_to_New_Tenancy', 'Total_Rooms', 'Area_m2',
@@ -46,19 +36,18 @@ def predict_tenancy_scores(profile_data, all_tenancies):
     recommendations = []
 
     for tenancy in all_tenancies:
-        
-        # Debug: Check for sets in tenancy dictionary
+
         for key, value in tenancy.items():
             if isinstance(value, set):
                 print(f"Found set in tenancy field {key}: {value}")
-                tenancy[key] = list(value)  # Convert set to list for JSON serialization
+                tenancy[key] = list(value) 
         
         feature_row = {
             "Age": int(profile_data.get("age", 0)) or 0,
             "Adults": int(profile_data.get("number_of_adults", 0)) or 0,
             "Children": int(profile_data.get("number_of_children", 0)) or 0,
             "IsStudent": is_student,
-            "Distance_to_New_Tenancy": float(tenancy.get("distance_to_new_tenancy", 0)) or 0,
+            "Distance_to_New_Tenancy": haversine(current_lat, current_lon, float(tenancy.get("latitude")), float(tenancy.get("longitude"))) or np.nan,
             "Rent": float(tenancy.get("rent_amount", 0)) or 0,
             "Total_Rooms": int(tenancy.get("total_rooms", 0)) or 0,
             "Area_m2": float(tenancy.get("size", 0)) or 0,
@@ -66,8 +55,9 @@ def predict_tenancy_scores(profile_data, all_tenancies):
             "Gym_distance": round(float(tenancy.get("gym_distance", 0)), 2) or 0,
             "School_distance": round(float(tenancy.get("school_distance", 0)), 2) or 0,
             "Supermarket_distance": round(float(tenancy.get("supermarket_distance", 0)), 2) or 0,
-            "Distance_to_University": round(float(tenancy.get("distance_to_university", 0)), 2) if tenancy.get("distance_to_university") is not None else np.nan,
+            "Distance_to_University": haversine(university_lat, university_lon, float(tenancy.get("latitude")), float(tenancy.get("longitude"))) if is_student else np.nan,
         }
+        
 
         X_input = pd.DataFrame([feature_row], columns=features)
         score = model.predict(X_input)[0]
