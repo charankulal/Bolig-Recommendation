@@ -64,7 +64,7 @@
                 </div>
                 <div class="form-group">
                     <label for="{{ form.number_of_children.id_for_label }}">{{ form.number_of_children.label }}</label>
-                    <input type="number" class="form-control" id="{{ form.number_of_children.id_for_label }}" name="number_of_children" value="{{ myprofiledata.0.number_of_children|default:'' }}">
+                    <input type="number" class="form-control" id="{{ form.number_of_children.id_for_label }}" name="number_of_children" value="{{ myprofiledata.0.number_of_children|default:0 }}">
                     {% if form.number_of_children.errors %}
                     <div class="text-danger">{{ form.number_of_children.errors }}</div>
                     {% endif %}

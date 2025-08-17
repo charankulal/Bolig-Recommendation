@@ -1,7 +1,6 @@
 from django.http import JsonResponse
 from django.shortcuts import render
 from .forms import MyProfileForm
-from .utilities.maps_utility import get_address_suggestions
 from .utilities.predict_tenancy_utility import predict_tenancy_scores
 from django.views.decorators.csrf import csrf_exempt
 from .models import Tenancy
@@ -31,10 +30,19 @@ def recommend_page(request):
 def recommendations(request):
     if request.method == 'POST':
         inserted_tenancy_count = update_database()
-        data = request.POST
+        profile_data = request.POST
+        all_tenancies = Tenancy.objects.all()
         try:
-            tenancies = predict_tenancy_scores(data)
-            return JsonResponse({"tenancies": tenancies, "count_of_tenancies": inserted_tenancy_count})
+            tenancies = predict_tenancy_scores(profile_data, all_tenancies)
+
+            for tenancy in tenancies:
+                for key, value in tenancy.items():
+                    if isinstance(value, set):
+                        tenancy[key] = list(value)
+            return JsonResponse({
+                "tenancies": tenancies,
+                "count_of_tenancies": inserted_tenancy_count
+            })
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
     return JsonResponse({"error": "Invalid request"}, status=400)
