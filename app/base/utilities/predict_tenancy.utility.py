@@ -31,9 +31,9 @@ def predict_tenancy_scores(profile_data):
             "Children": profile_data.get("number_of_children"),
             "IsStudent": profile_data.get("is_student"),
             "Distance_to_New_Tenancy": profile_data.get("Distance_to_New_Tenancy"),
-            "Rent": tenancy.rent,  # from tenancy table
+            "Rent": tenancy.rent_amount,  # from tenancy table
             "Total_Rooms": tenancy.total_rooms,
-            "Area_m2": tenancy.area_m2,
+            "Area_m2": tenancy.size,
             "Hospital_distance": tenancy.hospital_distance,
             "Gym_distance": tenancy.gym_distance,
             "School_distance": tenancy.school_distance,
