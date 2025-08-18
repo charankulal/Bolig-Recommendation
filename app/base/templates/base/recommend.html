@@ -151,8 +151,8 @@
             const loaderHtml = `
             <div id="loader" class="d-flex justify-content-center align-items-center" style="height: 200px;">
                 <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
                 </div>
+                <span class="mx-3 text-secondary">Loading Recommendations...</span>
             </div>
             `;
             $('#tenancies-container').html(loaderHtml);
@@ -185,7 +185,7 @@
                 $container.empty();
 
                 if (tenancies && tenancies.length > 0) {
-                tenancies.slice(0, 10).forEach(tenancy => {
+                tenancies.forEach(tenancy => {
                     const cardHtml = `
                     <div class="col-md-12 tenancy-card">
                         <div class="card h-100 w-100">
