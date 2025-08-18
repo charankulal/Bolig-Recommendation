@@ -322,20 +322,6 @@
         "distance_to_supermarket": 2.68
     },
     {
-        "name": "Dusager 21 Tenancy",
-        "description": "A comfortable housing tenancy located in Aarhus N, Denmark, suitable for individuals or families.",
-        "address": "Dusager 21, 8200 Aarhus N, Denmark",
-        "latitude": 56.19265465,
-        "longitude": 10.18428729,
-        "rooms": 3,
-        "rent": 6046.0,
-        "size_sqm": 110.0,
-        "distance_to_hospital": 0.75,
-        "distance_to_school": 2.74,
-        "distance_to_gym": 1.64,
-        "distance_to_supermarket": 2.44
-    },
-    {
         "name": "Dusager 22 Tenancy",
         "description": "A comfortable housing tenancy located in Aarhus N, Denmark, suitable for individuals or families.",
         "address": "Dusager 22, 8200 Aarhus N, Denmark",
