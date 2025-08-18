@@ -64,7 +64,7 @@
                 </div>
                 <div class="form-group">
                     <label for="{{ form.number_of_children.id_for_label }}">{{ form.number_of_children.label }}</label>
-                    <input type="number" class="form-control" id="{{ form.number_of_children.id_for_label }}" name="number_of_children" value="{{ myprofiledata.0.number_of_children|default:'' }}">
+                    <input type="number" class="form-control" id="{{ form.number_of_children.id_for_label }}" name="number_of_children" value="{{ myprofiledata.0.number_of_children|default:0 }}">
                     {% if form.number_of_children.errors %}
                     <div class="text-danger">{{ form.number_of_children.errors }}</div>
                     {% endif %}
@@ -147,58 +147,91 @@
         $('#profile-form').on('submit', function (e) {
             e.preventDefault();
 
-            $.ajax({
-                url: '/recommendations/',
-                type: 'POST',
-                data: $(this).serialize(),
-                success: function (data) {
-                    const tenancies = data.tenancies;
-                    const $container = $('#tenancies-container');
-                    $container.empty();
+            // Show loader
+            const loaderHtml = `
+            <div id="loader" class="d-flex justify-content-center align-items-center" style="height: 200px;">
+                <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+            `;
+            $('#tenancies-container').html(loaderHtml);
 
-                    if (tenancies && tenancies.length > 0) {
-                        tenancies.slice(0, 10).forEach(tenancy => {
-                            const cardHtml = `
-                                <div class="col-md-12 tenancy-card">
-                                    <div class="card h-100 w-100">
-                                        <span class="position-absolute end-0 badge text-bg-success">
-                                            ${tenancy.recommendation}% relevant to your profile
-                                        </span>
-                                        <div class="card-body">
-                                            <h5 class="card-title mb-0">${tenancy.title}</h5>
-                                            <p class="card-text mb-0">${tenancy.description}</p>
-                                            <div class="d-flex flex-row flex-wrap gap-3 mb-2">
-                                                <p class="card-text mb-0"><strong>Price:</strong> ${tenancy.price}</p>
-                                                <p class="card-text mb-0"><strong>Address:</strong> ${tenancy.address}</p>
-                                                <p class="card-text mb-0"><strong>Rooms:</strong> ${tenancy.rooms}</p>
-                                                <p class="card-text mb-0"><strong>Size:</strong> ${tenancy.size}</p>
-                                            </div>
-                                            <a href="#" class="btn btn-primary mx-2 d-inline-flex align-items-center">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-right mx-2" viewBox="0 0 16 16">
-                                                    <path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0z"/>
-                                                    <path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708z"/>
-                                                </svg>
-                                                View Details
-                                            </a>
-                                            <a href="#" class="btn btn-success mx-2 d-inline-flex align-items-center">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bag-heart-fill mx-2" viewBox="0 0 16 16">
-                                                    <path d="M11.5 4v-.5a3.5 3.5 0 1 0-7 0V4H1v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4zM8 1a2.5 2.5 0 0 1 2.5 2.5V4h-5v-.5A2.5 2.5 0 0 1 8 1m0 6.993c1.664-1.711 5.825 1.283 0 5.132-5.825-3.85-1.664-6.843 0-5.132"/>
-                                                </svg>
-                                                Add to wishlist
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            `;
-                            $container.append(cardHtml);
-                        });
-                    } else {
-                        $container.append('<p>No tenancies found.</p>');
-                    }
-                },
-                error: function () {
-                    $('#tenancies-container').html('<p class="text-danger">Error loading recommendations.</p>');
+            $.ajax({
+            url: '/recommendations/',
+            type: 'POST',
+            data: $(this).serialize(),
+            success: function (data) {
+                $('.toast').remove();
+                const toastHtml = `
+                <div class="toast align-items-center text-bg-success border-0 position-fixed top-0 start-50 translate-middle-x mt-3" role="alert" aria-live="assertive" aria-atomic="true" style="z-index: 9999; min-width: 300px;">
+                    <div class="d-flex">
+                    <div class="toast-body">
+                        Recommendations loaded successfully!
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                </div>
+                `;
+                $('body').append(toastHtml);
+                const toastEl = $('.toast').get(0);
+                if (toastEl) {
+                const toast = new bootstrap.Toast(toastEl, { delay: 3000 });
+                toast.show();
                 }
+
+                const tenancies = data.tenancies;
+                const $container = $('#tenancies-container');
+                $container.empty();
+
+                if (tenancies && tenancies.length > 0) {
+                tenancies.slice(0, 10).forEach(tenancy => {
+                    const cardHtml = `
+                    <div class="col-md-12 tenancy-card">
+                        <div class="card h-100 w-100">
+                        <span class="position-absolute end-0 badge text-bg-success">
+                            ${tenancy.recommendation}% relevant to your profile
+                        </span>
+                        <div class="card-body">
+                            <h5 class="card-title mb-0">${tenancy.title}</h5>
+                            <p class="card-text mb-0">${tenancy.description}</p>
+                            <div class="d-flex flex-row flex-wrap gap-1">
+                            <p class="mb-0"><strong>Price:</strong> ${tenancy.price}</p>
+                            <p class="mb-0"><strong>Address:</strong> ${tenancy.address}</p>
+                            <p class="mb-0"><strong>Rooms:</strong> ${tenancy.rooms}</p>
+                            <p class="mb-0"><strong>Size:</strong> ${tenancy.size}</p>
+                            <p class="mb-0"><strong>Distance to New Tenancy:</strong> ${tenancy.distace_to_new_tenancy} km</p> 
+                            <p class="mb-0"><strong>Distance to Hospital:</strong> ${tenancy.Hospital_distance} km</p>
+                            <p class="mb-0"><strong> Distance to Supermarket:</strong> ${tenancy.Supermarket_distance} km</p>
+                            <p class="mb-0"><strong>Distance to School:</strong>  ${tenancy.School_distance} km</p>
+                            <p class="mb-0"><strong>Distance to University:</strong>  ${tenancy.Distance_to_University} km</p>
+                            </div>
+                            <a href="#" class="btn btn-primary m-2 d-inline-flex align-items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-right mx-2" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0z"/>
+                                <path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708z"/>
+                            </svg>
+                            View Details
+                            </a>
+                            <a href="#" class="btn btn-success m-2 d-inline-flex align-items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bag-heart-fill mx-2" viewBox="0 0 16 16">
+                                <path d="M11.5 4v-.5a3.5 3.5 0 1 0-7 0V4H1v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4zM8 1a2.5 2.5 0 0 1 2.5 2.5V4h-5v-.5A2.5 2.5 0 0 1 8 1m0 6.993c1.664-1.711 5.825 1.283 0 5.132-5.825-3.85-1.664-6.843 0-5.132"/>
+                            </svg>
+                            Add to wishlist
+                            </a>
+                        </div>
+                        </div>
+                    </div>
+                    `;
+                    $container.append(cardHtml);
+                });
+                } else {
+                $container.append('<p>No tenancies found.</p>');
+                }
+            },
+            error: function () {
+                $('#tenancies-container').html('<p class="text-danger">Error loading recommendations.</p>');
+            }
             });
         });
     });
