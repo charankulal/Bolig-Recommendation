@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 
 def load_model():
-    model_path = Path(__file__).parent.parent.parent.parent / 'stacked_housing_model.joblib'
+    model_path = Path(__file__).parent.parent.parent.parent / 'student_bolig_recommendation_model.joblib'
     return joblib.load(model_path)
 
 def predict_tenancy_scores(profile_data, all_tenancies):
@@ -16,20 +16,29 @@ def predict_tenancy_scores(profile_data, all_tenancies):
     
     is_student = profile_data.get("is_student") == "on"
     
+    # features = [
+    #     'Age', 'Adults', 'Children', 'Rent', 'IsStudent',
+    #     'Distance_to_New_Tenancy', 'Total_Rooms', 'Area_m2',
+    #     'Hospital_distance', 'Gym_distance', 'School_distance',
+    #     'Supermarket_distance', 'Distance_to_University'
+    # ]
+    
     if is_student:
         university_lat = float(profile_data.get("university_latitude"))
         university_lon = float(profile_data.get("university_longitude"))
+        
+        features = [
+        'Age', 'Adults', 'Children', 'Rent', 
+        'Distance_to_New_Tenancy', 'Total_Rooms', 'Area_m2',
+        'Hospital_distance', 'Gym_distance', 'School_distance',
+        'Supermarket_distance', 'Distance_to_University'
+    ]
     
             
     current_lat = float(profile_data.get("address_latitude"))
     current_lon = float(profile_data.get("address_longitude"))
     
-    features = [
-        'Age', 'Adults', 'Children', 'Rent', 'IsStudent',
-        'Distance_to_New_Tenancy', 'Total_Rooms', 'Area_m2',
-        'Hospital_distance', 'Gym_distance', 'School_distance',
-        'Supermarket_distance', 'Distance_to_University'
-    ]
+    
     
     # Load model
     model = load_model()
@@ -46,7 +55,6 @@ def predict_tenancy_scores(profile_data, all_tenancies):
             "Age": int(profile_data.get("age", 0)) or 0,
             "Adults": int(profile_data.get("number_of_adults", 0)) or 0,
             "Children": int(profile_data.get("number_of_children", 0)) or 0,
-            "IsStudent": is_student,
             "Distance_to_New_Tenancy": haversine(current_lat, current_lon, float(tenancy.get("latitude")), float(tenancy.get("longitude"))) or np.nan,
             "Rent": float(tenancy.get("rent_amount", 0)) or 0,
             "Total_Rooms": int(tenancy.get("total_rooms", 0)) or 0,
